@@ -25,7 +25,7 @@ const GameIndex = () => {
 
     const fetchVideoGames = async (query = '') => {
         try {
-            const response = await fetch(`http://localhost:3000/videogames${query}`);
+            const response = await fetch(`http://localhost:3001/videogames${query}`);
             const data = await response.json();
             setGames(data);
             setShowSortButtons(true);

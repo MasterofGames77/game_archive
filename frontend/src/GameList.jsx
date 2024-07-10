@@ -14,7 +14,7 @@ const GameList = () => {
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:3000/videogames')
+    fetch('http://localhost:3001/videogames')
       .then(response => response.json())
       .then(data => {
         setVideoGamesData(data);
