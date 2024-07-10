@@ -100,26 +100,29 @@ tr:hover {
 
 .artwork-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
   background-color: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
 }
 
 .artwork-image {
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 90vw; /* Adjust these values to fit your needs */
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
 }
 
 .close-button {
   position: absolute;
-  top: 20px;
-  right: 40px;
-  font-size: 40px;
-  color: #fff;
+  top: 0px;
+  right: 20px;
+  font-size: 2rem;
+  color: white;
   cursor: pointer;
 }

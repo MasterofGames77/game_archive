@@ -53,6 +53,8 @@ const GameIndex = () => {
     };
 
     const displayVideoGames = (data) => {
+        const tableBody = videogamesTable.querySelector('tbody');
+        tableBody.innerHTML = ''; // Clear any previous content
         if (data.length === 0) {
             return (
                 <tr>
