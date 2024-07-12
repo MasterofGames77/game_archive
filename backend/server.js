@@ -1,20 +1,33 @@
+// Load environment variables from .env file
 require('dotenv').config();
+
+// Import necessary modules
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+
+// Create an instance of express for our app
 const app = express();
+
+// Define the port to run the server on
 const port = process.env.PORT || 3001;
 
+// Middleware to parse URL-encoded bodies (as sent by HTML forms)
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Middleware to parse JSON bodies (as sent by API clients)
 app.use(bodyParser.json());
+
+// Middleware to enable CORS (Cross-Origin Resource Sharing)
 app.use(cors());
 
 // Serve static files from the "public" and "game images" directories
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/game-images', express.static(path.join(__dirname, 'game images')));
 
+// Create a connection to the MySQL database using configuration from environment variables
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -22,6 +35,7 @@ const connection = mysql.createConnection({
     database: process.env.DB_NAME,
 });
 
+// Connect to the MySQL server
 connection.connect(err => {
     if (err) {
         console.error('Error connecting to MySQL Server:', err);
@@ -30,6 +44,7 @@ connection.connect(err => {
     console.log('Connected to MySQL Server!');
 });
 
+// Define a route to fetch data for a single video game by its ID
 app.get('/videogames/:id', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM videogames WHERE id = ?';
@@ -44,6 +59,7 @@ app.get('/videogames/:id', (req, res) => {
     });
 });
 
+// Define a route to fetch all video games optionally filtered by query parameters
 app.get('/videogames', (req, res) => {
     const { title, developer, publisher, genre, platform } = req.query;
 
@@ -84,6 +100,7 @@ app.get('/videogames', (req, res) => {
     });
 });
 
+// Define a route to fetch artwork URL for a specific video game by its ID
 app.get('/videogames/:id/artwork', (req, res) => {
     const { id } = req.params;
     const query = 'SELECT artwork_url FROM videogames WHERE id = ?';
@@ -99,6 +116,7 @@ app.get('/videogames/:id/artwork', (req, res) => {
     });
 });
 
+// Start the server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
