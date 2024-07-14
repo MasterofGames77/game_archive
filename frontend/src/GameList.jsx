@@ -3,11 +3,8 @@ import React, { useEffect, useState } from 'react';
 import './game_index.css';
 
 const GameList = () => {
-  // State to store all video games fetched from the database.
   const [videoGamesData, setVideoGamesData] = useState([]);
-  // State to store filtered list of games based on search criteria.
   const [filteredGames, setFilteredGames] = useState([]);
-  // State to store search parameters entered by the user.
   const [searchCriteria, setSearchCriteria] = useState({
     title: '',
     developer: '',
@@ -68,17 +65,32 @@ const GameList = () => {
     setSelectedGameArtwork(null);
   };
 
+  // Handler to clear the search boxes and table.
+  const handleClear = () => {
+    setSearchCriteria({
+      title: '',
+      developer: '',
+      publisher: '',
+      genre: '',
+      platform: ''
+    });
+    setFilteredGames([]);
+  };
+
   // JSX rendering of the component.
   return (
     <div className="container">
       <h1>Video Games Archive</h1>
       <div className="search-container">
-        <input type="text" placeholder="Search by title" onChange={e => setSearchCriteria({ ...searchCriteria, title: e.target.value })} />
-        <input type="text" placeholder="Search by developer" onChange={e => setSearchCriteria({ ...searchCriteria, developer: e.target.value })} />
-        <input type="text" placeholder="Search by publisher" onChange={e => setSearchCriteria({ ...searchCriteria, publisher: e.target.value })} />
-        <input type="text" placeholder="Search by genre" onChange={e => setSearchCriteria({ ...searchCriteria, genre: e.target.value })} />
-        <input type="text" placeholder="Search by platform" onChange={e => setSearchCriteria({ ...searchCriteria, platform: e.target.value })} />
-        <button onClick={handleSearch}>Search</button>
+        <input type="text" id="title" value={searchCriteria.title} placeholder="Search by title" onChange={e => setSearchCriteria({ ...searchCriteria, title: e.target.value })} />
+        <input type="text" id="developer" value={searchCriteria.developer} placeholder="Search by developer" onChange={e => setSearchCriteria({ ...searchCriteria, developer: e.target.value })} />
+        <input type="text" id="publisher" value={searchCriteria.publisher} placeholder="Search by publisher" onChange={e => setSearchCriteria({ ...searchCriteria, publisher: e.target.value })} />
+        <input type="text" id="genre" value={searchCriteria.genre} placeholder="Search by genre" onChange={e => setSearchCriteria({ ...searchCriteria, genre: e.target.value })} />
+        <input type="text" id="platform" value={searchCriteria.platform} placeholder="Search by platform" onChange={e => setSearchCriteria({ ...searchCriteria, platform: e.target.value })} />
+        <div className="button-container">
+          <button onClick={handleSearch}>Search</button>
+          <button onClick={handleClear}>Clear</button>
+        </div>
       </div>
       <div id="sort-buttons" style={{ display: filteredGames.length ? 'block' : 'none' }}>
         <button onClick={handleSortByTitle}>Sort by Title</button>
