@@ -3,8 +3,11 @@ import React, { useEffect, useState } from 'react';
 import './game_index.css';
 
 const GameList = () => {
+  // State to store all video games fetched from the database.
   const [videoGamesData, setVideoGamesData] = useState([]);
+  // State to store filtered list of games based on search criteria.
   const [filteredGames, setFilteredGames] = useState([]);
+  // State to store search parameters entered by the user.
   const [searchCriteria, setSearchCriteria] = useState({
     title: '',
     developer: '',
@@ -14,6 +17,8 @@ const GameList = () => {
   });
   // State to manage the display of the modal showing the game artwork.
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
+  // State to store the message when no results are found.
+  const [noResultsMessage, setNoResultsMessage] = useState('');
 
   // Effect hook to fetch video games data from the server on component mount.
   useEffect(() => {
@@ -36,7 +41,9 @@ const GameList = () => {
         (!searchCriteria.platform || game.platform.toLowerCase().includes(searchCriteria.platform.toLowerCase()))
       );
     });
+
     setFilteredGames(filtered);
+    setNoResultsMessage(filtered.length === 0 ? 'No results found that met search criteria' : '');
   };
 
   // Handler to sort games by title in alphabetical order.
@@ -75,6 +82,7 @@ const GameList = () => {
       platform: ''
     });
     setFilteredGames([]);
+    setNoResultsMessage('');
   };
 
   // JSX rendering of the component.
@@ -93,33 +101,40 @@ const GameList = () => {
         </div>
       </div>
       <div id="sort-buttons" style={{ display: filteredGames.length ? 'block' : 'none' }}>
-        <button onClick={handleSortByTitle}>Sort by Title</button>
+        <button onClick={handleSortByTitle}>Sort by Title (A-Z)</button>
         <button onClick={handleSortByReleaseDate}>Sort by Release Date</button>
       </div>
-      <table id="videogames-table" style={{ display: filteredGames.length ? 'table' : 'none' }}>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Developer</th>
-            <th>Publisher</th>
-            <th>Genre</th>
-            <th>Release Date</th>
-            <th>Platform</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredGames.map(game => (
-            <tr key={game.id}>
-              <td onClick={() => handleTitleClick(game.artwork_url)} className="clickable-title">{game.title}</td>
-              <td>{game.developer}</td>
-              <td>{game.publisher}</td>
-              <td>{game.genre}</td>
-              <td>{new Date(game.release_date).toISOString().split('T')[0]}</td>
-              <td>{game.platform}</td>
+      {noResultsMessage && !filteredGames.length && (
+        <div className="no-results-message">
+          {noResultsMessage}
+        </div>
+      )}
+      {filteredGames.length > 0 && (
+        <table id="videogames-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Developer</th>
+              <th>Publisher</th>
+              <th>Genre</th>
+              <th>Release Date</th>
+              <th>Platform</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredGames.map(game => (
+              <tr key={game.id}>
+                <td onClick={() => handleTitleClick(game.artwork_url)} className="clickable-title">{game.title}</td>
+                <td>{game.developer}</td>
+                <td>{game.publisher}</td>
+                <td>{game.genre}</td>
+                <td>{new Date(game.release_date).toISOString().split('T')[0]}</td>
+                <td>{game.platform}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
       {selectedGameArtwork && (
         <div className="artwork-modal" onClick={handleCloseArtwork}>
           <span className="close-button" onClick={handleCloseArtwork}>&times;</span>

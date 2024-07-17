@@ -131,3 +131,9 @@ tr:hover {
   display: flex;
   gap: 10px;
 }
+
+.no-results-message {
+  color: white;
+  margin-top: 20px;
+  font-size: 18px;
+}
