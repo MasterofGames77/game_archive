@@ -32,6 +32,13 @@ const GameList = () => {
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
+    // Check if all search criteria are empty
+    if (!searchCriteria.title && !searchCriteria.developer && !searchCriteria.publisher && !searchCriteria.genre && !searchCriteria.platform) {
+      setFilteredGames([]);
+      setNoResultsMessage('Please enter search criteria');
+      return;
+    }
+
     const filtered = videoGamesData.filter(game => {
       return (
         (!searchCriteria.title || game.title.toLowerCase().includes(searchCriteria.title.toLowerCase())) &&
