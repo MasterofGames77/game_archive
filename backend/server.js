@@ -36,12 +36,15 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Determine if the environment is production
+const isProduction = process.env.NODE_ENV === 'production';
+
 // Create a connection to the MySQL database using configuration from environment variables
 const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 // Connect to the MySQL server
