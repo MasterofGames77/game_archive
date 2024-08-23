@@ -1,9 +1,13 @@
+// Import React library and hooks for managing state and effects, and import styling.
 import React, { useEffect, useState } from 'react';
 import './game_index.css';
 
 const GameList = () => {
+  // State to store all video games fetched from the database.
   const [videoGamesData, setVideoGamesData] = useState([]);
+  // State to store filtered list of games based on search criteria.
   const [filteredGames, setFilteredGames] = useState([]);
+  // State to store search parameters entered by the user.
   const [searchCriteria, setSearchCriteria] = useState({
     title: '',
     developer: '',
@@ -11,11 +15,14 @@ const GameList = () => {
     genre: '',
     platform: ''
   });
+  // State to manage the display of the modal showing the game artwork.
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
+  // State to store the message when no results are found.
   const [noResultsMessage, setNoResultsMessage] = useState('');
 
+  // Effect hook to fetch video games data from the server on component mount.
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/videogames`)
+    fetch('http://localhost:3001/videogames')
       .then(response => response.json())
       .then(data => {
         setVideoGamesData(data);
@@ -23,7 +30,9 @@ const GameList = () => {
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
+  // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
+    // Check if all search criteria are empty
     if (!searchCriteria.title && !searchCriteria.developer && !searchCriteria.publisher && !searchCriteria.genre && !searchCriteria.platform) {
       setFilteredGames([]);
       setNoResultsMessage('Please enter search criteria');
@@ -44,28 +53,33 @@ const GameList = () => {
     setNoResultsMessage(filtered.length === 0 ? 'No results found that met search criteria' : '');
   };
 
+  // Handler to sort games by title in alphabetical order.
   const handleSortByTitle = () => {
     const sorted = [...filteredGames].sort((a, b) => a.title.localeCompare(b.title));
     setFilteredGames(sorted);
   };
 
+  // Handler to sort games by release date from oldest to newest.
   const handleSortByReleaseDate = () => {
     const sorted = [...filteredGames].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
     setFilteredGames(sorted);
   };
 
+  // Handler for clicking on game titles to display their artwork.
   const handleTitleClick = artwork_url => {
     if (artwork_url.startsWith('http')) {
       setSelectedGameArtwork(artwork_url);
     } else {
-      setSelectedGameArtwork(`${process.env.REACT_APP_API_URL}/${artwork_url}`);
+      setSelectedGameArtwork(`${process.env.PUBLIC_URL}/${artwork_url}`);
     }
   };
 
+  // Handler to close the modal and clear the selected artwork.
   const handleCloseArtwork = () => {
     setSelectedGameArtwork(null);
   };
 
+  // Handler to clear the search boxes and table.
   const handleClear = () => {
     setSearchCriteria({
       title: '',
@@ -78,6 +92,7 @@ const GameList = () => {
     setNoResultsMessage('');
   };
 
+  // JSX rendering of the component.
   return (
     <div className="container">
       <h1>Video Games Archive</h1>
