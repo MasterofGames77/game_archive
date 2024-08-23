@@ -6,7 +6,8 @@
     "start": "node backend/server.js"
   },
   "engines": {
-    "node": ">=14.x"
+    "node": "16.x",
+    "npm": "8.x"
   },
   "dependencies": {},
   "devDependencies": {}
