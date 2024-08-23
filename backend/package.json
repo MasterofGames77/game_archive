@@ -1,13 +1,19 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend for video game archive system",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "video games",
+    "archive",
+    "backend",
+    "express"
+  ],
+  "author": "Your Name",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
@@ -15,5 +21,8 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "mysql2": "^3.10.2"
+  },
+  "engines": {
+    "node": ">=14.x"
   }
 }
