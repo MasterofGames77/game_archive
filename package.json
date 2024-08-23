@@ -10,5 +10,12 @@
     "npm": "8.19.4"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.24.7",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-class-properties": "^7.25.4",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.24.7",
+    "@babel/plugin-transform-numeric-separator": "^7.24.7",
+    "@babel/plugin-transform-optional-chaining": "^7.24.8"
+  }
 }
