@@ -27,6 +27,15 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/game-images', express.static(path.join(__dirname, 'game images')));
 
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  });
+}
+
 // Create a connection to the MySQL database using configuration from environment variables
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,

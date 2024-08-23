@@ -1,11 +1,8 @@
-// Import React library and state management via hooks, as well as CSS for styling.
 import React, { useState, useEffect } from 'react';
 import './game_index.css';
 
 const GameIndex = () => {
-    // State for managing the list of games.
     const [games, setGames] = useState([]);
-    // State for managing search parameters.
     const [searchParams, setSearchParams] = useState({
         title: '',
         developer: '',
@@ -13,28 +10,25 @@ const GameIndex = () => {
         genre: '',
         platform: '',
     });
-    // State to control visibility of sort buttons.
     const [showSortButtons, setShowSortButtons] = useState(false);
-    // State to control visibility of the modal for displaying game artwork.
     const [modalOpen, setModalOpen] = useState(false);
-    // State to store the URL of the selected game's artwork.
     const [selectedGameArtwork, setSelectedGameArtwork] = useState('');
 
-    // Effect hook to fetch games data on component mount.
     useEffect(() => {
         // Placeholder for fetching games. Normally fetch data here.
     }, []);
 
-    // Handler for input changes, updates the search parameters state.
     const handleInputChange = (e) => {
         const { id, value } = e.target;
         setSearchParams({ ...searchParams, [id]: value });
     };
 
-    // Function to fetch video games based on search query.
     const fetchVideoGames = async (query = '') => {
         try {
-            const response = await fetch(`http://localhost:3001/videogames${query}`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/videogames${query}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             const data = await response.json();
             setGames(data);
             setShowSortButtons(true);
@@ -43,7 +37,6 @@ const GameIndex = () => {
         }
     };
 
-    // Handler to perform search based on the search parameters.
     const handleSearch = () => {
         const { title, developer, publisher, genre, platform } = searchParams;
         let query = '?';
@@ -52,7 +45,7 @@ const GameIndex = () => {
         if (publisher) query += `publisher=${encodeURIComponent(publisher)}&`;
         if (genre) query += `genre=${encodeURIComponent(genre)}&`;
         if (platform) query += `platform=${encodeURIComponent(platform)}&`;
-        query = query.slice(0, -1); // Remove trailing '&' or '?' if no parameters
+        query = query.slice(0, -1);
 
         if (query !== '?') {
             fetchVideoGames(query);
@@ -62,10 +55,7 @@ const GameIndex = () => {
         }
     };
 
-    // Function to display video games in a table format.
     const displayVideoGames = (data) => {
-        const tableBody = videogamesTable.querySelector('tbody');
-        tableBody.innerHTML = ''; // Clear any previous content
         if (data.length === 0) {
             return (
                 <tr>
@@ -88,7 +78,6 @@ const GameIndex = () => {
         });
     };
 
-    // Handler for clicking on a game title to display its artwork.
     const handleGameClick = (artworkUrl) => {
         if (artworkUrl) {
             setSelectedGameArtwork(artworkUrl);
@@ -96,25 +85,21 @@ const GameIndex = () => {
         }
     };
 
-    // Function to close the modal displaying the artwork.
     const closeModal = () => {
         setModalOpen(false);
         setSelectedGameArtwork('');
     };
 
-    // Function to sort games by title.
     const sortByTitle = () => {
         const sortedData = [...games].sort((a, b) => a.title.localeCompare(b.title));
         setGames(sortedData);
     };
 
-    // Function to sort games by release date.
     const sortByDate = () => {
         const sortedData = [...games].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
         setGames(sortedData);
     };
 
-    // Rendering the component.
     return (
         <div className="container">
             <h1>Video Games Archive</h1>
