@@ -36,9 +36,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Determine if the environment is production
-const isProduction = process.env.NODE_ENV === 'production';
-
 // Create a connection to the MySQL database using configuration from environment variables
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
