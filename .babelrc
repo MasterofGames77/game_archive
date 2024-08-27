@@ -7,6 +7,7 @@
         "@babel/plugin-transform-class-properties",
         "@babel/plugin-transform-nullish-coalescing-operator",
         "@babel/plugin-transform-numeric-separator",
-        "@babel/plugin-transform-optional-chaining"
+        "@babel/plugin-transform-optional-chaining",
+        "@babel/plugin-proposal-private-property-in-object"
     ]
 }
