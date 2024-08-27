@@ -6,7 +6,15 @@
     "start": "node backend/server.js"
   },
   "engines": {
-    "node": "16.20.2",
-    "npm": "8.19.4"
+    "node": "20.12.1",
+    "npm": "10.8.2"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-class-properties": "^7.25.4",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.24.7",
+    "@babel/plugin-transform-numeric-separator": "^7.24.7",
+    "@babel/plugin-transform-optional-chaining": "^7.24.8",
+    "@babel/plugin-transform-private-property-in-object": "^7.24.7",
+    "@babel/preset-react": "^7.24.7"
   }
 }
