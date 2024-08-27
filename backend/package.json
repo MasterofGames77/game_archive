@@ -4,7 +4,8 @@
   "description": "Backend for video game archive system",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run build:frontend && node server.js",
+    "build:frontend": "npm --prefix ../frontend run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
