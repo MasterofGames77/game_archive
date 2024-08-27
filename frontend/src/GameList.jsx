@@ -1,4 +1,3 @@
-// Import React library and hooks for managing state and effects, and import styling.
 import React, { useEffect, useState } from 'react';
 import './game_index.css';
 
@@ -23,11 +22,12 @@ const GameList = () => {
   // Effect hook to fetch video games data from the server on component mount.
   useEffect(() => {
     fetch('http://localhost:3001/videogames')
-      .then(response => response.json())
-      .then(data => {
-        setVideoGamesData(data);
-      })
-      .catch(error => console.error('Error fetching data:', error));
+        .then(response => response.json())
+        .then(data => {
+            //console.log('Fetched data:', data); // Add this line to see the data
+            setVideoGamesData(data);
+        })
+        .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   // Handler for search button click, filters video games based on search criteria.

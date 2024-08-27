@@ -27,21 +27,12 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/game-images', express.static(path.join(__dirname, 'game images')));
 
-// Serve React frontend in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-  });
-}
-
 // Create a connection to the MySQL database using configuration from environment variables
 const connection = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 });
 
 // Connect to the MySQL server
@@ -108,6 +99,15 @@ app.get('/videogames', (req, res) => {
         res.json(results);
     });
 });
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+    });
+}
 
 // Define a route to fetch artwork URL for a specific video game by its ID
 app.get('/videogames/:id/artwork', (req, res) => {

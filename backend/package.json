@@ -4,10 +4,10 @@
   "description": "Backend for video game archive system",
   "main": "server.js",
   "scripts": {
-    "start": "npm run build:frontend && node server.js",
+    "start": "node server.js",
     "build:frontend": "npm --prefix ../frontend run build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "heroku-postbuild": "npm --prefix frontend install && npm run build:frontend"
+    "heroku-postbuild": "npm --prefix ../frontend install && npm run build:frontend"
   },
   "keywords": [
     "video games",

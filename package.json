@@ -2,20 +2,11 @@
   "name": "game-archive",
   "version": "1.0.0",
   "scripts": {
-    "heroku-postbuild": "cd frontend && npm install && npm run build",
+    "heroku-postbuild": "npm install --prefix frontend && npm run build --prefix frontend",
     "start": "node backend/server.js"
   },
   "engines": {
     "node": "16.20.2",
     "npm": "8.19.4"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "@babel/plugin-transform-private-property-in-object": "^7.24.7",
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@babel/plugin-transform-class-properties": "^7.25.4",
-    "@babel/plugin-transform-nullish-coalescing-operator": "^7.24.7",
-    "@babel/plugin-transform-numeric-separator": "^7.24.7",
-    "@babel/plugin-transform-optional-chaining": "^7.24.8"
   }
 }
