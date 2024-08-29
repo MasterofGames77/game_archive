@@ -35,18 +35,16 @@ const GameIndex = () => {
     const fetchVideoGames = async (query = '') => {
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/videogames${query}`);
-            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
             const data = await response.json();
             setGames(data);
-            setShowSortButtons(true);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-    };    
+    };
+        
 
     // Handler to perform search based on the search parameters.
     const handleSearch = () => {

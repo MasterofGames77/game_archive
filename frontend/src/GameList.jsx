@@ -24,13 +24,12 @@ const GameList = () => {
     const apiUrl = process.env.REACT_APP_API_URL || '';
     fetch(`${apiUrl}/videogames`)
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+            console.log('Response:', response);
+            return response.text(); // Temporarily use text() to see the raw response
         })
         .then(data => {
-            setVideoGamesData(data);
+            console.log('Raw data:', data);
+            setVideoGamesData(JSON.parse(data));
         })
         .catch(error => console.error('Error fetching data:', error));
   }, []);    
