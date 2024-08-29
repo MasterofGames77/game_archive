@@ -24,15 +24,17 @@ const GameList = () => {
     const apiUrl = process.env.REACT_APP_API_URL || '';
     fetch(`${apiUrl}/videogames`)
         .then(response => {
-            console.log('Response:', response);
-            return response.text(); // Temporarily use text() to see the raw response
+            if (!response.ok) {
+                console.error('HTTP error, status = ' + response.status);
+                throw new Error('Failed to fetch');
+            }
+            return response.json();
         })
         .then(data => {
-            console.log('Raw data:', data);
-            setVideoGamesData(JSON.parse(data));
+            setVideoGamesData(data);
         })
         .catch(error => console.error('Error fetching data:', error));
-  }, []);    
+  }, []);      
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
