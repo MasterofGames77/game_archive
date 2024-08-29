@@ -23,12 +23,17 @@ const GameList = () => {
   useEffect(() => {
     const apiUrl = process.env.REACT_APP_API_URL || '';
     fetch(`${apiUrl}/videogames`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             setVideoGamesData(data);
         })
         .catch(error => console.error('Error fetching data:', error));
-}, []);
+  }, []);    
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
