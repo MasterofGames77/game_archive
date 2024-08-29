@@ -34,8 +34,12 @@ const GameIndex = () => {
     // Function to fetch video games based on search query.
     const fetchVideoGames = async (query = '') => {
         try {
-            const apiUrl = process.env.REACT_APP_API_URL || '';
-            const response = await fetch(`${apiUrl}/videogames${query}`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/videogames${query}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             setGames(data);
             setShowSortButtons(true);
