@@ -21,14 +21,14 @@ const GameList = () => {
 
   // Effect hook to fetch video games data from the server on component mount.
   useEffect(() => {
-    fetch('http://localhost:3001/videogames')
+    const apiUrl = process.env.REACT_APP_API_URL || '';
+    fetch(`${apiUrl}/videogames`)
         .then(response => response.json())
         .then(data => {
-            //console.log('Fetched data:', data); // Add this line to see the data
             setVideoGamesData(data);
         })
         .catch(error => console.error('Error fetching data:', error));
-  }, []);
+}, []);
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
