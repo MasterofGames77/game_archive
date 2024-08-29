@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build:frontend": "npm --prefix ../frontend run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -14,7 +13,7 @@
     "backend",
     "express"
   ],
-  "author": "Your Name",
+  "author": "Michael Gambardella",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.20.2",
