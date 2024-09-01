@@ -38,10 +38,13 @@ async function startServer() {
             database: process.env.DB_NAME,
         });
 
+        console.log('Connected to MySQL Server!');
+
         // Define a route to fetch data for a single video game by its ID
         app.get('/videogames/:id', async (req, res) => {
             const { id } = req.params;
             try {
+                console.log(`Fetching game with ID: ${id}`);
                 const [results] = await connection.query('SELECT * FROM videogames WHERE id = ?', [id]);
                 if (results.length === 0) {
                     return res.json({ message: 'Game not found' });
@@ -56,6 +59,8 @@ async function startServer() {
         // Define a route to fetch all video games optionally filtered by query parameters
         app.get('/videogames', async (req, res) => {
             const { title, developer, publisher, genre, platform } = req.query;
+
+            console.log('Fetching video games with filters:', req.query);
 
             let query = 'SELECT * FROM videogames';
             const queryParams = [];
@@ -87,6 +92,7 @@ async function startServer() {
 
             try {
                 const [results] = await connection.query(query, queryParams);
+                console.log('Fetched video games:', results);
                 res.json(results);
             } catch (err) {
                 console.error('Database error:', err);
@@ -98,6 +104,7 @@ async function startServer() {
         app.get('/videogames/:id/artwork', async (req, res) => {
             const { id } = req.params;
             try {
+                console.log(`Fetching artwork for game with ID: ${id}`);
                 const [results] = await connection.query('SELECT artwork_url FROM videogames WHERE id = ?', [id]);
                 if (results.length === 0) {
                     return res.status(404).json({ message: 'Game not found' });
@@ -112,6 +119,7 @@ async function startServer() {
 
         // Serve React frontend in production
         if (process.env.NODE_ENV === 'production') {
+            console.log('Serving React frontend');
             app.use(express.static(path.join(__dirname, '../frontend/build')));
 
             app.get('*', (req, res) => {
