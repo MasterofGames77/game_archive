@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Import necessary modules
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -27,101 +27,108 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/game-images', express.static(path.join(__dirname, 'game images')));
 
-// Use connection pooling for MySQL
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10, // Adjust based on your needs
-    queueLimit: 0
-});
-
-const connection = pool.promise(); // Use promise-based queries
-
-// Define a route to fetch data for a single video game by its ID
-app.get('/videogames/:id', async (req, res) => {
-    const { id } = req.params;
+// Function to start the server and handle database connection
+async function startServer() {
     try {
-        const [results] = await connection.query('SELECT * FROM videogames WHERE id = ?', [id]);
-        if (results.length === 0) {
-            return res.json({ message: 'Game not found' });
+        // Create a connection to the MySQL database using configuration from environment variables
+        const connection = await mysql.createConnection({
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
+        });
+
+        // Define a route to fetch data for a single video game by its ID
+        app.get('/videogames/:id', async (req, res) => {
+            const { id } = req.params;
+            try {
+                const [results] = await connection.query('SELECT * FROM videogames WHERE id = ?', [id]);
+                if (results.length === 0) {
+                    return res.json({ message: 'Game not found' });
+                }
+                res.json(results[0]);
+            } catch (err) {
+                console.error('Database error:', err);
+                res.status(500).json({ error: 'Database error' });
+            }
+        });
+
+        // Define a route to fetch all video games optionally filtered by query parameters
+        app.get('/videogames', async (req, res) => {
+            const { title, developer, publisher, genre, platform } = req.query;
+
+            let query = 'SELECT * FROM videogames';
+            const queryParams = [];
+            if (title || developer || publisher || genre || platform) {
+                query += ' WHERE ';
+                const conditions = [];
+                if (title) {
+                    conditions.push('title LIKE ?');
+                    queryParams.push(`%${title}%`);
+                }
+                if (developer) {
+                    conditions.push('developer LIKE ?');
+                    queryParams.push(`%${developer}%`);
+                }
+                if (publisher) {
+                    conditions.push('publisher LIKE ?');
+                    queryParams.push(`%${publisher}%`);
+                }
+                if (genre) {
+                    conditions.push('genre LIKE ?');
+                    queryParams.push(`%${genre}%`);
+                }
+                if (platform) {
+                    conditions.push('platform LIKE ?');
+                    queryParams.push(`%${platform}%`);
+                }
+                query += conditions.join(' AND ');
+            }
+
+            try {
+                const [results] = await connection.query(query, queryParams);
+                res.json(results);
+            } catch (err) {
+                console.error('Database error:', err);
+                res.status(500).json({ error: 'Database error' });
+            }
+        });
+
+        // Define a route to fetch artwork URL for a specific video game by its ID
+        app.get('/videogames/:id/artwork', async (req, res) => {
+            const { id } = req.params;
+            try {
+                const [results] = await connection.query('SELECT artwork_url FROM videogames WHERE id = ?', [id]);
+                if (results.length === 0) {
+                    return res.status(404).json({ message: 'Game not found' });
+                }
+                const artworkUrl = results[0].artwork_url;
+                res.json({ artworkUrl });
+            } catch (err) {
+                console.error('Database error:', err);
+                res.status(500).json({ error: 'Database error' });
+            }
+        });
+
+        // Serve React frontend in production
+        if (process.env.NODE_ENV === 'production') {
+            app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+            app.get('*', (req, res) => {
+                res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+            });
         }
-        res.json(results[0]);
+
+        // Start the server
+        app.listen(port, () => {
+            console.log(`Server running on port ${port}`);
+        });
+
     } catch (err) {
-        console.error('Database error:', err);
-        res.status(500).json({ error: 'Database error' });
+        console.error('Error connecting to MySQL Server:', err);
+        process.exit(1); // Exit the process with an error code
     }
-});
-
-// Define a route to fetch all video games optionally filtered by query parameters
-app.get('/videogames', async (req, res) => {
-    const { title, developer, publisher, genre, platform } = req.query;
-
-    let query = 'SELECT * FROM videogames';
-    const queryParams = [];
-    if (title || developer || publisher || genre || platform) {
-        query += ' WHERE ';
-        const conditions = [];
-        if (title) {
-            conditions.push('title LIKE ?');
-            queryParams.push(`%${title}%`);
-        }
-        if (developer) {
-            conditions.push('developer LIKE ?');
-            queryParams.push(`%${developer}%`);
-        }
-        if (publisher) {
-            conditions.push('publisher LIKE ?');
-            queryParams.push(`%${publisher}%`);
-        }
-        if (genre) {
-            conditions.push('genre LIKE ?');
-            queryParams.push(`%${genre}%`);
-        }
-        if (platform) {
-            conditions.push('platform LIKE ?');
-            queryParams.push(`%${platform}%`);
-        }
-        query += conditions.join(' AND ');
-    }
-
-    try {
-        const [results] = await connection.query(query, queryParams);
-        res.json(results);
-    } catch (err) {
-        console.error('Database error:', err);
-        res.status(500).json({ error: 'Database error' });
-    }
-});
-
-// Define a route to fetch artwork URL for a specific video game by its ID
-app.get('/videogames/:id/artwork', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const [results] = await connection.query('SELECT artwork_url FROM videogames WHERE id = ?', [id]);
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Game not found' });
-        }
-        const artworkUrl = results[0].artwork_url;
-        res.json({ artworkUrl });
-    } catch (err) {
-        console.error('Database error:', err);
-        res.status(500).json({ error: 'Database error' });
-    }
-});
-
-// Serve React frontend in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../frontend/build')));
-
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
-    });
 }
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+// Run the server
+startServer();
