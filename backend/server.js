@@ -27,43 +27,38 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/game-images', express.static(path.join(__dirname, 'game images')));
 
-// Create a connection to the MySQL database using configuration from environment variables
-const connection = mysql.createConnection({
+// Use connection pooling for MySQL
+const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10, // Adjust based on your needs
+    queueLimit: 0
 });
 
-// Connect to the MySQL server
-connection.connect(err => {
-    if (err) {
-        console.error('Error connecting to MySQL Server:', err);
-        process.exit(1); // Exit the process with an error code
-    }
-    console.log('Connected to MySQL Server!');
-});
+const connection = pool.promise(); // Use promise-based queries
 
 // Define a route to fetch data for a single video game by its ID
-app.get('/videogames/:id', (req, res) => {
+app.get('/videogames/:id', async (req, res) => {
     const { id } = req.params;
-    const query = 'SELECT * FROM videogames WHERE id = ?';
-    connection.query(query, [id], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+    try {
+        const [results] = await connection.query('SELECT * FROM videogames WHERE id = ?', [id]);
         if (results.length === 0) {
             return res.json({ message: 'Game not found' });
         }
         res.json(results[0]);
-    });
+    } catch (err) {
+        console.error('Database error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 // Define a route to fetch all video games optionally filtered by query parameters
-app.get('/videogames', (req, res) => {
+app.get('/videogames', async (req, res) => {
     const { title, developer, publisher, genre, platform } = req.query;
 
-    // Construct the SQL query dynamically
     let query = 'SELECT * FROM videogames';
     const queryParams = [];
     if (title || developer || publisher || genre || platform) {
@@ -92,12 +87,29 @@ app.get('/videogames', (req, res) => {
         query += conditions.join(' AND ');
     }
 
-    connection.query(query, queryParams, (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
+    try {
+        const [results] = await connection.query(query, queryParams);
         res.json(results);
-    });
+    } catch (err) {
+        console.error('Database error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+// Define a route to fetch artwork URL for a specific video game by its ID
+app.get('/videogames/:id/artwork', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [results] = await connection.query('SELECT artwork_url FROM videogames WHERE id = ?', [id]);
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Game not found' });
+        }
+        const artworkUrl = results[0].artwork_url;
+        res.json({ artworkUrl });
+    } catch (err) {
+        console.error('Database error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 // Serve React frontend in production
@@ -108,22 +120,6 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
     });
 }
-
-// Define a route to fetch artwork URL for a specific video game by its ID
-app.get('/videogames/:id/artwork', (req, res) => {
-    const { id } = req.params;
-    const query = 'SELECT artwork_url FROM videogames WHERE id = ?';
-    connection.query(query, [id], (err, results) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Game not found' });
-        }
-        const artworkUrl = results[0].artwork_url;
-        res.json({ artworkUrl });
-    });
-});
 
 // Start the server
 app.listen(port, () => {
