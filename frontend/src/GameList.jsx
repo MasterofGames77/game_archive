@@ -26,7 +26,10 @@ const GameList = () => {
         .then(response => {
             if (!response.ok) {
                 console.error('HTTP error, status = ' + response.status);
-                throw new Error('Failed to fetch');
+                return response.text().then(text => {
+                    console.error('Response text:', text); // Log the entire response for debugging
+                    throw new Error('Failed to fetch');
+                });
             }
             return response.json();
         })
