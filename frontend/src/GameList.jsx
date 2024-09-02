@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './game_index.css';
+import axios from 'axios';
 
 const GameList = () => {
   // State to store all video games fetched from the database.
@@ -18,25 +19,19 @@ const GameList = () => {
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
   // State to store the message when no results are found.
   const [noResultsMessage, setNoResultsMessage] = useState('');
-
-  // Effect hook to fetch video games data from the server on component mount.
+  
   useEffect(() => {
     const apiUrl = process.env.REACT_APP_API_URL || '';
-    fetch(`${apiUrl}/videogames`)
-        .then(async response => {
-            if (!response.ok) {
-                console.error('HTTP error, status = ' + response.status);
-                const text = await response.text();
-              console.error('Response text:', text); // Log the entire response for debugging
-              throw new Error('Failed to fetch');
-            }
-            return response.json();
-        })
-        .then(data => {
-            setVideoGamesData(data);
-        })
-        .catch(error => console.error('Error fetching data:', error));
-  }, []);      
+
+    // Use Axios to fetch video games data
+    axios.get(`${apiUrl}/videogames`)
+      .then(response => {
+        setVideoGamesData(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []); // Empty dependency array means this effect runs once on mount
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
