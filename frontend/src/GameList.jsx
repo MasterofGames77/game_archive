@@ -21,23 +21,27 @@ const GameList = () => {
   const [noResultsMessage, setNoResultsMessage] = useState('');
   
   useEffect(() => {
-    const apiUrl = process.env.REACT_APP_API_URL || '';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    axios.get(`${apiUrl}/videogames`)
-      .then(response => {
-        // Ensure the response data is an array before setting it
-        if (Array.isArray(response.data)) {
-          setVideoGamesData(response.data);
-        } else {
-          console.error('Unexpected data format:', response.data);
-          setVideoGamesData([]); // Default to empty array if response is not as expected
+    axios.get(`${apiUrl}/videogames`, {
+        headers: {
+            'Content-Type': 'application/json',
         }
-      })
-      .catch(error => {
+    })
+    .then(response => {
+        if (Array.isArray(response.data)) {
+            setVideoGamesData(response.data);
+        } else {
+            console.error('Unexpected data format:', response.data);
+            setVideoGamesData([]);
+        }
+    })
+    .catch(error => {
         console.error('Error fetching data:', error);
-        setVideoGamesData([]); // Default to empty array on error
-      });
+        setVideoGamesData([]);
+    });
 }, []);
+
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
