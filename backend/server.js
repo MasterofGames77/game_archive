@@ -12,7 +12,7 @@ const path = require('path');
 const app = express();
 
 // Define the port to run the server on
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Middleware to parse URL-encoded bodies (as sent by HTML forms)
 app.use(bodyParser.urlencoded({ extended: true }));
