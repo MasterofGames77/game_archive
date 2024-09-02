@@ -21,7 +21,7 @@ const GameList = () => {
   const [noResultsMessage, setNoResultsMessage] = useState('');
   
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = "https://video-game-archive-204be6e591a2.herokuapp.com";
 
     axios.get(`${apiUrl}/videogames`, {
         headers: {
@@ -32,13 +32,11 @@ const GameList = () => {
         if (Array.isArray(response.data)) {
             setVideoGamesData(response.data);
         } else {
-            console.error('Unexpected data format:', response.data);
-            setVideoGamesData([]);
+            console.error('Unexpected data format:', response.data[0]);
         }
     })
     .catch(error => {
         console.error('Error fetching data:', error);
-        setVideoGamesData([]);
     });
 }, []);
 

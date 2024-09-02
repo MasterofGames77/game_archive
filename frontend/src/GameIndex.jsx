@@ -34,7 +34,7 @@ const GameIndex = () => {
     // Function to fetch video games based on search query.
     const fetchVideoGames = async (query = '') => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/videogames${query}`);
+            const response = await fetch(`${"https://video-game-archive-204be6e591a2.herokuapp.com"}/videogames${query}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
