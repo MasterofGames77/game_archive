@@ -19,8 +19,11 @@ const GameList = () => {
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
   // State to store the message when no results are found.
   const [noResultsMessage, setNoResultsMessage] = useState('');
+
+  console.log(process.env.REACT_APP_API_URL);
   
   useEffect(() => {
+    //const apiUrl = process.env.REACT_APP_API_URL;
     const apiUrl = "https://video-game-archive-204be6e591a2.herokuapp.com";
 
     axios.get(`${apiUrl}/videogames`, {
