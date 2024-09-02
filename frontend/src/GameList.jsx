@@ -23,38 +23,48 @@ const GameList = () => {
   useEffect(() => {
     const apiUrl = process.env.REACT_APP_API_URL || '';
 
-    // Use Axios to fetch video games data
     axios.get(`${apiUrl}/videogames`)
       .then(response => {
-        setVideoGamesData(response.data);
+        // Ensure the response data is an array before setting it
+        if (Array.isArray(response.data)) {
+          setVideoGamesData(response.data);
+        } else {
+          console.error('Unexpected data format:', response.data);
+          setVideoGamesData([]); // Default to empty array if response is not as expected
+        }
       })
       .catch(error => {
         console.error('Error fetching data:', error);
+        setVideoGamesData([]); // Default to empty array on error
       });
-  }, []); // Empty dependency array means this effect runs once on mount
+}, []);
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
-    // Check if all search criteria are empty
     if (!searchCriteria.title && !searchCriteria.developer && !searchCriteria.publisher && !searchCriteria.genre && !searchCriteria.platform) {
       setFilteredGames([]);
       setNoResultsMessage('Please enter search criteria');
       return;
     }
 
-    const filtered = videoGamesData.filter(game => {
-      return (
-        (!searchCriteria.title || game.title.toLowerCase().includes(searchCriteria.title.toLowerCase())) &&
-        (!searchCriteria.developer || game.developer.toLowerCase().includes(searchCriteria.developer.toLowerCase())) &&
-        (!searchCriteria.publisher || game.publisher.toLowerCase().includes(searchCriteria.publisher.toLowerCase())) &&
-        (!searchCriteria.genre || game.genre.toLowerCase().includes(searchCriteria.genre.toLowerCase())) &&
-        (!searchCriteria.platform || game.platform.toLowerCase().includes(searchCriteria.platform.toLowerCase()))
-      );
-    });
+    if (Array.isArray(videoGamesData)) { // Ensure videoGamesData is an array
+      const filtered = videoGamesData.filter(game => {
+        return (
+          (!searchCriteria.title || game.title.toLowerCase().includes(searchCriteria.title.toLowerCase())) &&
+          (!searchCriteria.developer || game.developer.toLowerCase().includes(searchCriteria.developer.toLowerCase())) &&
+          (!searchCriteria.publisher || game.publisher.toLowerCase().includes(searchCriteria.publisher.toLowerCase())) &&
+          (!searchCriteria.genre || game.genre.toLowerCase().includes(searchCriteria.genre.toLowerCase())) &&
+          (!searchCriteria.platform || game.platform.toLowerCase().includes(searchCriteria.platform.toLowerCase()))
+        );
+      });
 
-    setFilteredGames(filtered);
-    setNoResultsMessage(filtered.length === 0 ? 'No results found that met search criteria' : '');
-  };
+      setFilteredGames(filtered);
+      setNoResultsMessage(filtered.length === 0 ? 'No results found that met search criteria' : '');
+    } else {
+      console.error('videoGamesData is not an array:', videoGamesData);
+      setNoResultsMessage('An error occurred while searching. Please try again later.');
+    }
+};
 
   // Handler to sort games by title in alphabetical order.
   const handleSortByTitle = () => {
