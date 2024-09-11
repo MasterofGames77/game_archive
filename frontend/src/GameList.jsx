@@ -23,8 +23,9 @@ const GameList = () => {
   console.log(process.env.REACT_APP_API_URL);
   
   useEffect(() => {
-    //const apiUrl = process.env.REACT_APP_API_URL;
-    const apiUrl = "https://video-game-archive-204be6e591a2.herokuapp.com";
+    const apiUrl = window.location.hostname === 'localhost'
+        ? 'http://localhost:3001'
+        : 'https://video-game-archive-204be6e591a2.herokuapp.com';
 
     axios.get(`${apiUrl}/videogames`, {
         headers: {
@@ -35,14 +36,13 @@ const GameList = () => {
         if (Array.isArray(response.data)) {
             setVideoGamesData(response.data);
         } else {
-            console.error('Unexpected data format:', response.data[0]);
+            console.error('Unexpected data format:', response.data);
         }
     })
     .catch(error => {
         console.error('Error fetching data:', error);
     });
 }, []);
-
 
   // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
@@ -113,7 +113,7 @@ const GameList = () => {
   // JSX rendering of the component.
   return (
     <div className="container">
-      <h1>Video Games Archive</h1>
+      <img src={`${process.env.PUBLIC_URL}/video-game-archive-logo.png`} alt="Video Game Archive" className="logo" />
       <div className="search-container">
         <input type="text" id="title" value={searchCriteria.title} placeholder="Search by title" onChange={e => setSearchCriteria({ ...searchCriteria, title: e.target.value })} />
         <input type="text" id="developer" value={searchCriteria.developer} placeholder="Search by developer" onChange={e => setSearchCriteria({ ...searchCriteria, developer: e.target.value })} />

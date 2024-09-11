@@ -33,8 +33,12 @@ const GameIndex = () => {
 
     // Function to fetch video games based on search query.
     const fetchVideoGames = async (query = '') => {
+        const apiUrl = window.location.hostname === 'localhost'
+            ? 'http://localhost:3001'
+            : 'https://video-game-archive-204be6e591a2.herokuapp.com';
+    
         try {
-            const response = await fetch(`${"https://video-game-archive-204be6e591a2.herokuapp.com"}/videogames${query}`);
+            const response = await fetch(`${apiUrl}/videogames${query}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -44,8 +48,7 @@ const GameIndex = () => {
             console.error('Error fetching data:', error);
         }
     };
-        
-
+    
     // Handler to perform search based on the search parameters.
     const handleSearch = () => {
         const { title, developer, publisher, genre, platform } = searchParams;
