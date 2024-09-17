@@ -58,12 +58,12 @@ async function startServer() {
 
     // Define a route to fetch all video games optionally filtered by query parameters
     app.get('/videogames', async (req, res) => {
+        //console.log('Received request for /videogames with query:', req.query);
+    
         const { title, developer, publisher, genre, platform } = req.query;
-
-        //console.log('Fetching video games with filters:', req.query);
-
         let query = 'SELECT * FROM videogames';
         const queryParams = [];
+    
         if (title || developer || publisher || genre || platform) {
             query += ' WHERE ';
             const conditions = [];
@@ -89,16 +89,16 @@ async function startServer() {
             }
             query += conditions.join(' AND ');
         }
-
+    
         try {
+            console.log('Executing query:', query, queryParams);
             const [results] = await connection.query(query, queryParams);
-            //console.log('Fetched video games:', results);
-
-            // Set the content type to application/json
+            //console.log('Query results:', results);
+    
             res.setHeader('Content-Type', 'application/json');
             res.json(results);
         } catch (err) {
-            console.error('Database error:', err);
+            console.error('Database error during /videogames:', err);
             res.status(500).json({ error: 'Database error' });
         }
     });
@@ -124,7 +124,7 @@ async function startServer() {
         if (process.env.NODE_ENV === 'production') {
             console.log('Serving React frontend');
             app.use(express.static(path.join(__dirname, '../frontend/build')));
-
+        
             app.get('*', (req, res) => {
                 res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
             });

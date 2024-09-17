@@ -3,11 +3,8 @@ import './game_index.css';
 import axios from 'axios';
 
 const GameList = () => {
-  // State to store all video games fetched from the database.
   const [videoGamesData, setVideoGamesData] = useState([]);
-  // State to store filtered list of games based on search criteria.
   const [filteredGames, setFilteredGames] = useState([]);
-  // State to store search parameters entered by the user.
   const [searchCriteria, setSearchCriteria] = useState({
     title: '',
     developer: '',
@@ -15,24 +12,22 @@ const GameList = () => {
     genre: '',
     platform: ''
   });
-  // State to manage the display of the modal showing the game artwork.
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
-  // State to store the message when no results are found.
   const [noResultsMessage, setNoResultsMessage] = useState('');
 
-  console.log(process.env.REACT_APP_API_URL);
-  
-  useEffect(() => {
-    const apiUrl = window.location.hostname === 'localhost'
-        ? 'http://localhost:3001'
-        : process.env.REACT_APP_API_URL;
+  const apiUrl = window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : process.env.REACT_APP_API_URL;
+  const imageBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
+  useEffect(() => {
     axios.get(`${apiUrl}/videogames`, {
         headers: {
             'Content-Type': 'application/json',
         }
     })
     .then(response => {
+        console.log('Response data:', response.data); // Debugging line
         if (Array.isArray(response.data)) {
             setVideoGamesData(response.data);
         } else {
@@ -40,11 +35,10 @@ const GameList = () => {
         }
     })
     .catch(error => {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error); // Debugging line
     });
-}, []);
+  }, [apiUrl]);
 
-  // Handler for search button click, filters video games based on search criteria.
   const handleSearch = () => {
     if (!searchCriteria.title && !searchCriteria.developer && !searchCriteria.publisher && !searchCriteria.genre && !searchCriteria.platform) {
       setFilteredGames([]);
@@ -52,7 +46,7 @@ const GameList = () => {
       return;
     }
 
-    if (Array.isArray(videoGamesData)) { // Ensure videoGamesData is an array
+    if (Array.isArray(videoGamesData)) {
       const filtered = videoGamesData.filter(game => {
         return (
           (!searchCriteria.title || game.title.toLowerCase().includes(searchCriteria.title.toLowerCase())) &&
@@ -69,36 +63,30 @@ const GameList = () => {
       console.error('videoGamesData is not an array:', videoGamesData);
       setNoResultsMessage('An error occurred while searching. Please try again later.');
     }
-};
+  };
 
-  // Handler to sort games by title in alphabetical order.
   const handleSortByTitle = () => {
     const sorted = [...filteredGames].sort((a, b) => a.title.localeCompare(b.title));
     setFilteredGames(sorted);
   };
 
-  // Handler to sort games by release date from oldest to newest.
   const handleSortByReleaseDate = () => {
     const sorted = [...filteredGames].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
     setFilteredGames(sorted);
   };
 
-  // Handler for clicking on game titles to display their artwork.
   const handleTitleClick = (artwork_url) => {
-    const isLocal = window.location.hostname === 'localhost';
-    const imageUrl = isLocal
-        ? `${process.env.PUBLIC_URL}/${artwork_url}`
-        : `${process.env.REACT_APP_IMAGE_BASE_URL}/${artwork_url}`;
-
-    setSelectedGameArtwork(imageUrl);
+    const fullUrl = artwork_url.startsWith('http')
+        ? artwork_url
+        : `${imageBaseUrl}${artwork_url}`;
+    console.log('Full image URL:', fullUrl);
+    setSelectedGameArtwork(fullUrl);
   };
 
-  // Handler to close the modal and clear the selected artwork.
   const handleCloseArtwork = () => {
     setSelectedGameArtwork(null);
   };
 
-  // Handler to clear the search boxes and table.
   const handleClear = () => {
     setSearchCriteria({
       title: '',
@@ -111,7 +99,6 @@ const GameList = () => {
     setNoResultsMessage('');
   };
 
-  // JSX rendering of the component.
   return (
     <div className="container">
       <img src={`${process.env.PUBLIC_URL}/video-game-archive-logo.png`} alt="Video Game Archive" className="logo" />
