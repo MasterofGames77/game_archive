@@ -25,7 +25,7 @@ const GameList = () => {
   useEffect(() => {
     const apiUrl = window.location.hostname === 'localhost'
         ? 'http://localhost:3001'
-        : 'https://video-game-archive-204be6e591a2.herokuapp.com';
+        : process.env.REACT_APP_API_URL;
 
     axios.get(`${apiUrl}/videogames`, {
         headers: {
@@ -84,12 +84,13 @@ const GameList = () => {
   };
 
   // Handler for clicking on game titles to display their artwork.
-  const handleTitleClick = artwork_url => {
-    if (artwork_url.startsWith('http')) {
-      setSelectedGameArtwork(artwork_url);
-    } else {
-      setSelectedGameArtwork(`${process.env.PUBLIC_URL}/${artwork_url}`);
-    }
+  const handleTitleClick = (artwork_url) => {
+    const isLocal = window.location.hostname === 'localhost';
+    const imageUrl = isLocal
+        ? `${process.env.PUBLIC_URL}/${artwork_url}`
+        : `${process.env.REACT_APP_IMAGE_BASE_URL}/${artwork_url}`;
+
+    setSelectedGameArtwork(imageUrl);
   };
 
   // Handler to close the modal and clear the selected artwork.

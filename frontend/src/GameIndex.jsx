@@ -70,8 +70,6 @@ const GameIndex = () => {
 
     // Function to display video games in a table format.
     const displayVideoGames = (data) => {
-        const tableBody = videogamesTable.querySelector('tbody');
-        tableBody.innerHTML = ''; // Clear any previous content
         if (data.length === 0) {
             return (
                 <tr>
@@ -96,10 +94,14 @@ const GameIndex = () => {
 
     // Handler for clicking on a game title to display its artwork.
     const handleGameClick = (artworkUrl) => {
-        if (artworkUrl) {
-            setSelectedGameArtwork(artworkUrl);
-            setModalOpen(true);
-        }
+        const isLocal = window.location.hostname === 'localhost';
+        const baseImageUrl = isLocal
+            ? `${process.env.PUBLIC_URL}/game-images`
+            : 'https://video-game-images.s3.amazonaws.com/game+images';
+    
+        const imageUrl = artworkUrl.startsWith('http') ? artworkUrl : `${baseImageUrl}/${artworkUrl}`;
+        setSelectedGameArtwork(imageUrl);
+        setModalOpen(true);
     };
 
     // Function to close the modal displaying the artwork.
