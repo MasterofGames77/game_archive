@@ -24,21 +24,18 @@ const GameIndex = () => {
     };
 
     const fetchVideoGames = async (query = '') => {
-        const apiUrl = window.location.hostname === 'localhost'
-            ? 'http://localhost:3001'
-            : process.env.REACT_APP_API_URL;
-
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
         try {
             const response = await fetch(`${apiUrl}/videogames${query}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = await response.json(); // Ensure this is JSON
             setGames(data);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
-    };
+    };    
 
     const handleSearch = () => {
         const { title, developer, publisher, genre, platform } = searchParams;
