@@ -21,7 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Middleware to enable CORS (Cross-Origin Resource Sharing)
-app.use(cors());
+app.use(cors({
+    origin: process.env.REACT_APP_API_URL, // or '*' for allowing all origins in development
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+}));
 
 // Serve static files from the "public" and "game images" directories
 app.use(express.static(path.join(__dirname, 'public')));
@@ -57,8 +61,8 @@ async function startServer() {
         });
 
         // Define a route to fetch all video games optionally filtered by query parameters
-        // Define a route to fetch all video games optionally filtered by query parameters
     app.get('/videogames', async (req, res) => {
+        console.log('Received request with query:', req.query);
         const { title, developer, publisher, genre, platform } = req.query;
 
         //console.log('Fetching video games with filters:', req.query);
