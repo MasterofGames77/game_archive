@@ -57,47 +57,52 @@ async function startServer() {
         });
 
         // Define a route to fetch all video games optionally filtered by query parameters
-        app.get('/videogames', async (req, res) => {
-            const { title, developer, publisher, genre, platform } = req.query;
-            let query = 'SELECT * FROM videogames';
-            const queryParams = [];
-    
-            if (title || developer || publisher || genre || platform) {
-                query += ' WHERE ';
-                const conditions = [];
-                if (title) {
-                    conditions.push('title LIKE ?');
-                    queryParams.push(`%${title}%`);
-                }
-                if (developer) {
-                    conditions.push('developer LIKE ?');
-                    queryParams.push(`%${developer}%`);
-                }
-                if (publisher) {
-                    conditions.push('publisher LIKE ?');
-                    queryParams.push(`%${publisher}%`);
-                }
-                if (genre) {
-                    conditions.push('genre LIKE ?');
-                    queryParams.push(`%${genre}%`);
-                }
-                if (platform) {
-                    conditions.push('platform LIKE ?');
-                    queryParams.push(`%${platform}%`);
-                }
-                query += conditions.join(' AND ');
+        // Define a route to fetch all video games optionally filtered by query parameters
+    app.get('/videogames', async (req, res) => {
+        const { title, developer, publisher, genre, platform } = req.query;
+
+        //console.log('Fetching video games with filters:', req.query);
+
+        let query = 'SELECT * FROM videogames';
+        const queryParams = [];
+        if (title || developer || publisher || genre || platform) {
+            query += ' WHERE ';
+            const conditions = [];
+            if (title) {
+                conditions.push('title LIKE ?');
+                queryParams.push(`%${title}%`);
             }
-    
-            try {
-                console.log('Executing query:', query, queryParams);
-                const [results] = await connection.query(query, queryParams);
-                res.setHeader('Content-Type', 'application/json');
-                res.json(results);
-            } catch (err) {
-                console.error('Database error during /videogames:', err);
-                res.status(500).json({ error: 'Database error' });
+            if (developer) {
+                conditions.push('developer LIKE ?');
+                queryParams.push(`%${developer}%`);
             }
-        });
+            if (publisher) {
+                conditions.push('publisher LIKE ?');
+                queryParams.push(`%${publisher}%`);
+            }
+            if (genre) {
+                conditions.push('genre LIKE ?');
+                queryParams.push(`%${genre}%`);
+            }
+            if (platform) {
+                conditions.push('platform LIKE ?');
+                queryParams.push(`%${platform}%`);
+            }
+            query += conditions.join(' AND ');
+        }
+
+        try {
+            const [results] = await connection.query(query, queryParams);
+            //console.log('Fetched video games:', results);
+
+            // Set the content type to application/json
+            res.setHeader('Content-Type', 'application/json');
+            res.json(results);
+        } catch (err) {
+            console.error('Database error:', err);
+            res.status(500).json({ error: 'Database error' });
+        }
+    });
 
         // Define a route to fetch artwork URL for a specific video game by its ID
         app.get('/videogames/:id/artwork', async (req, res) => {
@@ -121,7 +126,6 @@ async function startServer() {
             console.log('Serving React frontend');
             app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-            // Catch-all route to serve the frontend application
             app.get('*', (req, res) => {
                 res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
             });
