@@ -29,7 +29,7 @@ const GameIndex = () => {
             : process.env.REACT_APP_API_URL;
 
         try {
-            const response = await fetch(`${apiUrl}videogames${query}`);
+            const response = await fetch(`${apiUrl}/videogames${query}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -142,7 +142,7 @@ const GameIndex = () => {
                     </tbody>
                 </table>
             )}
-            {modalOpen && (
+            {modalOpen && selectedGameArtwork(
                 <div id="myModal" className="modal">
                     <div className="modal-content">
                         <span className="close" onClick={closeModal}>&times;</span>

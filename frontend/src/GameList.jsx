@@ -21,7 +21,7 @@ const GameList = () => {
   const imageBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
   useEffect(() => {
-    axios.get(`${apiUrl}videogames`, {
+    axios.get(`${apiUrl}/videogames`, {
         headers: {
             'Content-Type': 'application/json',
         }
