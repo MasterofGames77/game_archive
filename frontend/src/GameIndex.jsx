@@ -13,7 +13,6 @@ const GameIndex = () => {
     const [showSortButtons, setShowSortButtons] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedGameArtwork, setSelectedGameArtwork] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         // Placeholder for fetching games. Normally fetch data here.
@@ -30,16 +29,14 @@ const GameIndex = () => {
             : process.env.REACT_APP_API_URL;
 
         try {
-            const response = await fetch(`${apiUrl}/videogames${query}`);
+            const response = await fetch(`${apiUrl}videogames${query}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
             setGames(data);
-            setErrorMessage('');
         } catch (error) {
             console.error('Error fetching data:', error);
-            setErrorMessage('Failed to load games. Please try again later.');
         }
     };
 
@@ -89,7 +86,7 @@ const GameIndex = () => {
         const imageUrl = artworkUrl.startsWith('http')
             ? artworkUrl
             : `${process.env.REACT_APP_IMAGE_BASE_URL}${artworkUrl}`;
-        
+            
         if (imageUrl) {
             setSelectedGameArtwork(imageUrl);
             setModalOpen(true);
@@ -145,7 +142,7 @@ const GameIndex = () => {
                     </tbody>
                 </table>
             )}
-            {modalOpen && selectedGameArtwork && (
+            {modalOpen && (
                 <div id="myModal" className="modal">
                     <div className="modal-content">
                         <span className="close" onClick={closeModal}>&times;</span>
