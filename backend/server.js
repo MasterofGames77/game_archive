@@ -21,7 +21,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Middleware to enable CORS (Cross-Origin Resource Sharing)
-app.use(cors());
+app.use(cors({
+    origin: process.env.REACT_APP_API_URL,
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+}));
 
 // Serve static files from the "public" and "game images" directories
 app.use(express.static(path.join(__dirname, 'public')));
@@ -36,6 +40,7 @@ async function startServer() {
             user: process.env.DB_USER,
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
+            ssl: { rejectUnauthorized: false }
         });
 
         console.log('Connected to MySQL Server!');
