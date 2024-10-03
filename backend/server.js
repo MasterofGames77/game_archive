@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 
 // Middleware to enable CORS (Cross-Origin Resource Sharing)
 app.use(cors({
-    origin: process.env.REACT_APP_API_URL,
+    origin: 'http://localhost:3000', // Allow requests from this origin
     methods: 'GET,POST,PUT,DELETE',
     credentials: true,
 }));
