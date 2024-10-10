@@ -18,7 +18,6 @@ const GameList = () => {
   const apiUrl = window.location.hostname === 'localhost'
     ? 'http://localhost:3001'
     : process.env.REACT_APP_API_URL;
-  const imageBaseUrl = process.env.REACT_APP_IMAGE_BASE_URL;
 
   useEffect(() => {
     axios.get(`${apiUrl}/videogames`, {
@@ -75,12 +74,12 @@ const GameList = () => {
     setFilteredGames(sorted);
   };
 
-  const handleTitleClick = (artwork_url) => {
-    const fullUrl = artwork_url.startsWith('http')
-        ? artwork_url
-        : `${imageBaseUrl}${artwork_url}`;
-    console.log('Full image URL:', fullUrl);
-    setSelectedGameArtwork(fullUrl);
+  const handleTitleClick = artwork_url => {
+    if (artwork_url.startsWith('http')) {
+      setSelectedGameArtwork(artwork_url);
+    } else {
+      setSelectedGameArtwork(`${process.env.PUBLIC_URL}/${artwork_url}`);
+    }
   };
 
   const handleCloseArtwork = () => {

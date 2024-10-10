@@ -83,10 +83,9 @@ const GameIndex = () => {
     };
 
     const handleGameClick = (artworkUrl) => {
-        const imageUrl = artworkUrl.startsWith('http')
-            ? artworkUrl
-            : `${process.env.REACT_APP_IMAGE_BASE_URL}${artworkUrl}`;
-            
+        // Access image directly from the public folder
+        const imageUrl = `/game images/${artworkUrl}`;
+        
         if (imageUrl) {
             setSelectedGameArtwork(imageUrl);
             setModalOpen(true);
@@ -142,7 +141,7 @@ const GameIndex = () => {
                     </tbody>
                 </table>
             )}
-            {modalOpen && selectedGameArtwork(
+            {modalOpen && selectedGameArtwork && (
                 <div id="myModal" className="modal">
                     <div className="modal-content">
                         <span className="close" onClick={closeModal}>&times;</span>
