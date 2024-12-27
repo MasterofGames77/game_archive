@@ -27,6 +27,48 @@ app.use(cors({
     credentials: true,
 }));
 
+// Initialize performance metrics storage
+const performanceMetrics = {
+    requests: 0,
+    totalTime: 0,
+    slowRequests: 0,
+    startTime: Date.now()
+};
+
+// Add metrics collection to the monitoring middleware
+app.use((req, res, next) => {
+    const start = process.hrtime();
+    
+    res.on('finish', () => {
+        const diff = process.hrtime(start);
+        const time = diff[0] * 1e3 + diff[1] * 1e-6;
+        
+        performanceMetrics.requests++;
+        performanceMetrics.totalTime += time;
+        
+        if (time > 1000) {
+            performanceMetrics.slowRequests++;
+        }
+    });
+    
+    next();
+});
+
+// Add endpoint to view performance metrics
+app.get('/api/performance', (req, res) => {
+    const uptime = Math.floor((Date.now() - performanceMetrics.startTime) / 1000);
+    const avgResponseTime = performanceMetrics.requests > 0 
+        ? (performanceMetrics.totalTime / performanceMetrics.requests).toFixed(2)
+        : 0;
+
+    res.json({
+        uptime: `${uptime} seconds`,
+        totalRequests: performanceMetrics.requests,
+        averageResponseTime: `${avgResponseTime}ms`,
+        slowRequests: performanceMetrics.slowRequests
+    });
+});
+
 // Serve static files from the "public" and "game images" directories
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/game-images', express.static(path.join(__dirname, 'game images')));
