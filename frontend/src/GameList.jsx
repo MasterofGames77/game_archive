@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './game_index.css';
 import axios from 'axios';
 
+// The GameList component is the main component for the game list page.
 const GameList = () => {
   const [videoGamesData, setVideoGamesData] = useState([]);
   const [filteredGames, setFilteredGames] = useState([]);
@@ -38,6 +39,7 @@ const GameList = () => {
     });
   }, [apiUrl]);
 
+  // Search for games that match the search criteria
   const handleSearch = () => {
     if (!searchCriteria.title && !searchCriteria.developer && !searchCriteria.publisher && !searchCriteria.genre && !searchCriteria.platform) {
       setFilteredGames([]);
@@ -64,16 +66,19 @@ const GameList = () => {
     }
   };
 
+  // Sort the games by title
   const handleSortByTitle = () => {
     const sorted = [...filteredGames].sort((a, b) => a.title.localeCompare(b.title));
     setFilteredGames(sorted);
   };
 
+  // Sort the games by release date
   const handleSortByReleaseDate = () => {
     const sorted = [...filteredGames].sort((a, b) => new Date(a.release_date) - new Date(b.release_date));
     setFilteredGames(sorted);
   };
 
+  // Open the artwork modal
   const handleTitleClick = artwork_url => {
     if (artwork_url.startsWith('http')) {
       setSelectedGameArtwork(artwork_url);
@@ -82,10 +87,12 @@ const GameList = () => {
     }
   };
 
+  // Close the artwork modal
   const handleCloseArtwork = () => {
     setSelectedGameArtwork(null);
   };
 
+  // Clear the search criteria
   const handleClear = () => {
     setSearchCriteria({
       title: '',
