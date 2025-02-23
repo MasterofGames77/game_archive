@@ -1,11 +1,10 @@
-import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import './game_index.css';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 
 // The GameList component is the main component for the game list page.
 const GameList = () => {
-  const [videoGamesData, setVideoGamesData] = useState([]);
   const [filteredGames, setFilteredGames] = useState([]);
   const [searchCriteria, setSearchCriteria] = useState({
     title: '',
@@ -16,6 +15,7 @@ const GameList = () => {
   });
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
   const [noResultsMessage, setNoResultsMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const apiUrl = useMemo(() => 
     window.location.hostname === 'localhost'
@@ -23,6 +23,13 @@ const GameList = () => {
       : process.env.REACT_APP_API_URL,
     []
   );
+
+  const api = useMemo(() => axios.create({
+    baseURL: apiUrl,
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  }), [apiUrl]);
 
   const handleTitleClick = useCallback(artwork_url => {
     if (artwork_url.startsWith('http')) {
@@ -32,40 +39,41 @@ const GameList = () => {
     }
   }, []);
 
-  const filterGames = useCallback((games, criteria) => {
-    if (!criteria.title && !criteria.developer && !criteria.publisher && 
-        !criteria.genre && !criteria.platform) {
-      return [];
-    }
-
-    return games.filter(game => {
-      const matchesTitle = !criteria.title || 
-        game.title.toLowerCase().includes(criteria.title.toLowerCase());
-      const matchesDeveloper = !criteria.developer || 
-        game.developer.toLowerCase().includes(criteria.developer.toLowerCase());
-      const matchesPublisher = !criteria.publisher || 
-        game.publisher.toLowerCase().includes(criteria.publisher.toLowerCase());
-      const matchesGenre = !criteria.genre || 
-        game.genre.toLowerCase().includes(criteria.genre.toLowerCase());
-      const matchesPlatform = !criteria.platform || 
-        game.platform.toLowerCase().includes(criteria.platform.toLowerCase());
-
-      return matchesTitle && matchesDeveloper && matchesPublisher && 
-             matchesGenre && matchesPlatform;
+  const buildQueryString = useCallback((criteria) => {
+    const params = new URLSearchParams();
+    Object.entries(criteria).forEach(([key, value]) => {
+      if (value) params.append(key, value);
     });
+    return params.toString();
   }, []);
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useCallback(async () => {
     if (!Object.values(searchCriteria).some(Boolean)) {
       setFilteredGames([]);
       setNoResultsMessage('Please enter search criteria');
       return;
     }
 
-    const filtered = filterGames(videoGamesData, searchCriteria);
-    setFilteredGames(filtered);
-    setNoResultsMessage(filtered.length === 0 ? 'No results found that met search criteria' : '');
-  }, [searchCriteria, videoGamesData, filterGames]);
+    setIsLoading(true);
+    try {
+      const queryString = buildQueryString(searchCriteria);
+      const response = await api.get(`/videogames${queryString ? `?${queryString}` : ''}`);
+      
+      if (Array.isArray(response.data)) {
+        setFilteredGames(response.data);
+        setNoResultsMessage(response.data.length === 0 ? 'No results found that met search criteria' : '');
+      } else {
+        console.error('Unexpected data format:', response.data);
+        setNoResultsMessage('Error fetching results');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setNoResultsMessage('Error fetching results');
+      setFilteredGames([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchCriteria, api, buildQueryString]);
 
   const debouncedSearch = useMemo(
     () => debounce(handleSearch, 300),
@@ -116,27 +124,6 @@ const GameList = () => {
     setNoResultsMessage('');
   }, []);
 
-  const api = useMemo(() => axios.create({
-    baseURL: apiUrl,
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  }), [apiUrl]);
-
-  useEffect(() => {
-    api.get('/videogames')
-      .then(response => {
-        if (Array.isArray(response.data)) {
-          setVideoGamesData(response.data);
-        } else {
-          console.error('Unexpected data format:', response.data);
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  }, [api]);
-
   return (
     <div className="container">
       <img src={`${process.env.PUBLIC_URL}/video-game-archive-logo.png`} alt="Video Game Archive" className="logo" />
@@ -155,27 +142,33 @@ const GameList = () => {
         <button onClick={handleSortByTitle}>Sort by Title (A-Z)</button>
         <button onClick={handleSortByReleaseDate}>Sort by Release Date</button>
       </div>
-      {noResultsMessage && !filteredGames.length && (
-        <div className="no-results-message">
-          {noResultsMessage}
-        </div>
-      )}
-      {filteredGames.length > 0 && (
-        <table id="videogames-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Developer</th>
-              <th>Publisher</th>
-              <th>Genre</th>
-              <th>Release Date</th>
-              <th>Platform</th>
-            </tr>
-          </thead>
-          <tbody>
-            {TableRows}
-          </tbody>
-        </table>
+      {isLoading ? (
+        <div className="loading-message">Loading...</div>
+      ) : (
+        <>
+          {noResultsMessage && !filteredGames.length && (
+            <div className="no-results-message">
+              {noResultsMessage}
+            </div>
+          )}
+          {filteredGames.length > 0 && (
+            <table id="videogames-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Developer</th>
+                  <th>Publisher</th>
+                  <th>Genre</th>
+                  <th>Release Date</th>
+                  <th>Platform</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TableRows}
+              </tbody>
+            </table>
+          )}
+        </>
       )}
       {selectedGameArtwork && (
         <div className="artwork-modal" onClick={handleCloseArtwork}>
