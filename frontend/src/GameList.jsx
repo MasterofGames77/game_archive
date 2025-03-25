@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import './game_index.css';
 import axios from 'axios';
+import debounce from 'lodash/debounce';
 
 // The GameList component is the main component for the game list page.
 const GameList = () => {
@@ -16,37 +17,76 @@ const GameList = () => {
   const [selectedGameArtwork, setSelectedGameArtwork] = useState(null);
   const [noResultsMessage, setNoResultsMessage] = useState('');
 
+  // Add new state for real-time filtering
+  const [localFilteredGames, setLocalFilteredGames] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+
   const apiUrl = window.location.hostname === 'localhost'
     ? 'http://localhost:3001'
     : process.env.REACT_APP_API_URL;
 
+  // Modified useEffect to fetch initial data
   useEffect(() => {
     axios.get(`${apiUrl}/videogames`, {
-        headers: {
-            'Content-Type': 'application/json',
-        }
+      headers: {
+        'Content-Type': 'application/json',
+      }
     })
     .then(response => {
-        console.log('Response data:', response.data); // Debugging line
-        if (Array.isArray(response.data)) {
-            setVideoGamesData(response.data);
-        } else {
-            console.error('Unexpected data format:', response.data);
-        }
+      if (Array.isArray(response.data)) {
+        setVideoGamesData(response.data);
+      } else {
+        console.error('Unexpected data format:', response.data);
+      }
     })
     .catch(error => {
-        console.error('Error fetching data:', error); // Debugging line
+      console.error('Error fetching data:', error);
     });
   }, [apiUrl]);
 
-  // Search for games that match the search criteria
-  const handleSearch = () => {
-    if (!searchCriteria.title && !searchCriteria.developer && !searchCriteria.publisher && !searchCriteria.genre && !searchCriteria.platform) {
+  // Fix the debouncedServerSearch implementation
+  const debouncedServerSearch = useCallback(
+    // Pass an inline function as recommended
+    async (criteria) => {
+      try {
+        const queryString = Object.entries(criteria)
+          .filter(([_, value]) => value)
+          .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+          .join('&');
+
+        const response = await axios.get(`${apiUrl}/videogames?${queryString}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (Array.isArray(response.data)) {
+          setFilteredGames(response.data);
+          setIsTyping(false);
+        }
+      } catch (error) {
+        console.error('Error fetching filtered data:', error);
+      }
+    },
+    [apiUrl, setFilteredGames, setIsTyping] // Add all dependencies
+  );
+
+  // Memoize the debounced function
+  const debouncedSearch = useMemo(
+    () => debounce(debouncedServerSearch, 500),
+    [debouncedServerSearch]
+  );
+
+  // Update handleSearch to use the memoized debounced function
+  const handleSearch = useCallback(() => {
+    if (!Object.values(searchCriteria).some(Boolean)) {
       setFilteredGames([]);
+      setLocalFilteredGames([]);
       setNoResultsMessage('Please enter search criteria');
       return;
     }
 
+    // Immediate local filtering
     if (Array.isArray(videoGamesData)) {
       const filtered = videoGamesData.filter(game => {
         return (
@@ -58,12 +98,19 @@ const GameList = () => {
         );
       });
 
-      setFilteredGames(filtered);
+      setLocalFilteredGames(filtered);
       setNoResultsMessage(filtered.length === 0 ? 'No results found that met search criteria' : '');
-    } else {
-      console.error('videoGamesData is not an array:', videoGamesData);
-      setNoResultsMessage('An error occurred while searching. Please try again later.');
     }
+
+    // Use the memoized debounced search
+    debouncedSearch(searchCriteria);
+  }, [searchCriteria, videoGamesData, debouncedSearch, setFilteredGames, setLocalFilteredGames, setNoResultsMessage]);
+
+  // Modified input handlers
+  const handleInputChange = (field, value) => {
+    setSearchCriteria(prev => ({ ...prev, [field]: value }));
+    setIsTyping(true);
+    handleSearch();
   };
 
   // Sort the games by title
@@ -102,6 +149,7 @@ const GameList = () => {
       platform: ''
     });
     setFilteredGames([]);
+    setLocalFilteredGames([]);
     setNoResultsMessage('');
   };
 
@@ -109,26 +157,32 @@ const GameList = () => {
     <div className="container">
       <img src={`${process.env.PUBLIC_URL}/video-game-archive-logo.png`} alt="Video Game Archive" className="logo" />
       <div className="search-container">
-        <input type="text" id="title" value={searchCriteria.title} placeholder="Search by title" onChange={e => setSearchCriteria({ ...searchCriteria, title: e.target.value })} />
-        <input type="text" id="developer" value={searchCriteria.developer} placeholder="Search by developer" onChange={e => setSearchCriteria({ ...searchCriteria, developer: e.target.value })} />
-        <input type="text" id="publisher" value={searchCriteria.publisher} placeholder="Search by publisher" onChange={e => setSearchCriteria({ ...searchCriteria, publisher: e.target.value })} />
-        <input type="text" id="genre" value={searchCriteria.genre} placeholder="Search by genre" onChange={e => setSearchCriteria({ ...searchCriteria, genre: e.target.value })} />
-        <input type="text" id="platform" value={searchCriteria.platform} placeholder="Search by platform" onChange={e => setSearchCriteria({ ...searchCriteria, platform: e.target.value })} />
+        <input 
+          type="text" 
+          id="title" 
+          value={searchCriteria.title} 
+          placeholder="Search by title" 
+          onChange={e => handleInputChange('title', e.target.value)} 
+        />
+        <input type="text" id="developer" value={searchCriteria.developer} placeholder="Search by developer" onChange={e => handleInputChange('developer', e.target.value)} />
+        <input type="text" id="publisher" value={searchCriteria.publisher} placeholder="Search by publisher" onChange={e => handleInputChange('publisher', e.target.value)} />
+        <input type="text" id="genre" value={searchCriteria.genre} placeholder="Search by genre" onChange={e => handleInputChange('genre', e.target.value)} />
+        <input type="text" id="platform" value={searchCriteria.platform} placeholder="Search by platform" onChange={e => handleInputChange('platform', e.target.value)} />
         <div className="button-container">
           <button onClick={handleSearch}>Search</button>
           <button onClick={handleClear}>Clear</button>
         </div>
       </div>
-      <div id="sort-buttons" style={{ display: filteredGames.length ? 'block' : 'none' }}>
+      <div id="sort-buttons" style={{ display: (localFilteredGames.length || filteredGames.length) ? 'block' : 'none' }}>
         <button onClick={handleSortByTitle}>Sort by Title (A-Z)</button>
         <button onClick={handleSortByReleaseDate}>Sort by Release Date</button>
       </div>
-      {noResultsMessage && !filteredGames.length && (
+      {noResultsMessage && !localFilteredGames.length && !filteredGames.length && (
         <div className="no-results-message">
           {noResultsMessage}
         </div>
       )}
-      {filteredGames.length > 0 && (
+      {(localFilteredGames.length > 0 || filteredGames.length > 0) && (
         <table id="videogames-table">
           <thead>
             <tr>
@@ -141,7 +195,7 @@ const GameList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredGames.map(game => (
+            {(isTyping ? localFilteredGames : filteredGames).map(game => (
               <tr key={game.id}>
                 <td onClick={() => handleTitleClick(game.artwork_url)} className="clickable-title">{game.title}</td>
                 <td>{game.developer}</td>
