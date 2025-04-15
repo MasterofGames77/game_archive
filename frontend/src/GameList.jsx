@@ -130,7 +130,7 @@ const GameList = () => {
     if (artwork_url.startsWith('http')) {
       setSelectedGameArtwork(artwork_url);
     } else {
-      setSelectedGameArtwork(`${process.env.PUBLIC_URL}/${artwork_url}`);
+      setSelectedGameArtwork(`${process.env.PUBLIC_URL}/game images/${artwork_url}`);
     }
   };
 
